@@ -1,23 +1,25 @@
-# from todoist_api_python.api_async import TodoistAPIAsync
 import argparse
 import json
 import os
+import platform
 from dataclasses import dataclass
-from datetime import datetime
-from random import choice
-from string import ascii_uppercase
 from typing import List
 
 from todoist_api_python.api import TodoistAPI
 from todoist_api_python.models import Label, Project, Task
 
+from entities.SPProject import SPProject
+from entities.SPTag import SPTag
+from entities.SPTask import SPTask
+
 
 @dataclass
 class ExporterConfig:
     projects: bool
-    tasks: bool
     labels: bool
     path: str
+    token: str
+    tasks: bool = True
 
 
 class TodoistScraper:
@@ -26,14 +28,16 @@ class TodoistScraper:
     tasks: List[Task]
     config: ExporterConfig
 
-    def __init__(self, args):
+    def __init__(self, config: ExporterConfig):
         """
         Initializes the TodoistScraper with a provided API token.
 
         Args:
             token (str): The API token used to authenticate with the Todoist API.
         """
-        self.api = TodoistAPI(args.token)
+        print(config)
+        self.api = TodoistAPI(config.token)
+        self.config = config
 
     @staticmethod
     def _obj_to_dict(list_objs: List[Project | Task | Label]):
@@ -109,20 +113,38 @@ class TodoistScraper:
             "labels": self._get_labels() if self.config.labels else []
         }
 
-    def todoist_task_to_superprod(self):
-        pass
+    def todoist_task_to_superprod(self) -> List[SPTask]:
+        tasks: List[Task] = self.api.get_tasks()
+        sptasks = []
+        for task in tasks:
+            sptasks.append(SPTask.from_todoist(task))
+        return sptasks
 
-    def todoist_project_to_superprod(self):
-        pass
+    def todoist_project_to_superprod(self) -> List[SPProject]:
+        projects: List[Project] = self.api.get_projects()
+        spprojects = []
+        for project in projects:
+            spprojects.append(SPProject.from_todoist(project))
+        return spprojects
 
-    def todoist_label_to_superprod(self):
-        pass
+    def todoist_label_to_superprod(self) -> List[SPTag]:
+        return []
 
     def todoist_to_superprod(self):
         pass
 
     def export_objects(self):
-        objects = self.collect_objects()
+        # objects = self.collect_objects()
+        objects = {}
+
+        if self.config.projects:
+            objects["projects"] = self.todoist_project_to_superprod()
+
+        if self.config.tasks:
+            objects["tasks"] = self.todoist_task_to_superprod()
+
+        if self.config.labels:
+            objects["labels"] = self.todoist_label_to_superprod()
 
         if self.config.path is not None and os.path.exists(self.config.path):
             with open(self.config.path, "w") as f:
@@ -152,6 +174,19 @@ if __name__ == '__main__':
         default=False,
         action='store_true',
         help='Whether to add subtasks as tasks or not add them at all')
-    args = parser.parse_args()
 
-    print(args)
+    args = parser.parse_args()
+    path = "~/Library/Application Support/superProductivity/"
+
+    if platform.system() == 'Windows':
+        path = "C:/Users/" + os.getlogin(
+        ) + "/AppData/Roaming/superProductivity/"
+    elif platform.system() == 'Linux':
+        path = "~/.config/superProductivity/"
+
+    exporter_config = ExporterConfig(projects=args.projects,
+                                     labels=args.labels,
+                                     path=path,
+                                     token=args.token)
+    todoist_scraper = TodoistScraper(exporter_config)
+    todoist_scraper.export_objects()
