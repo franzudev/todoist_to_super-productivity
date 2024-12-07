@@ -4,9 +4,11 @@ from typing import Dict, List, Optional
 
 from todoist_api_python.models import Task
 
+from entities.interfaces.Object import SPObject
+
 
 @dataclass
-class SPTask:
+class SPTask(SPObject):
     id: str = ''
     projectId: Optional[str] = None
     subTaskIds: List[str] = field(default_factory=list)
@@ -47,3 +49,6 @@ class SPTask:
                    tagIds=task.labels,
                    parentId=task.parent_id,
                    created=created)
+
+    def to_dict(self):
+        return self.__dict__

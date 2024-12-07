@@ -3,13 +3,14 @@ import json
 import os
 import platform
 from dataclasses import dataclass
-from typing import List
+from typing import List, Type
 
 from todoist_api_python.api import TodoistAPI
 from todoist_api_python.models import Label, Project, Task
 
+from entities.interfaces.Object import SPObject
+from entities.SPLabel import SPLabel
 from entities.SPProject import SPProject
-from entities.SPTag import SPTag
 from entities.SPTask import SPTask
 
 
@@ -35,7 +36,6 @@ class TodoistScraper:
         Args:
             token (str): The API token used to authenticate with the Todoist API.
         """
-        print(config)
         self.api = TodoistAPI(config.token)
         self.config = config
 
@@ -120,6 +120,17 @@ class TodoistScraper:
             sptasks.append(SPTask.from_todoist(task))
         return sptasks
 
+    def get_todoist_objects(self, cls: Type[SPObject]):
+        obj = cls.__name__.replace("SP", "")
+        if obj == "Project":
+            return self.api.get_projects()
+        elif obj == "Task":
+            return self.api.get_tasks()
+        elif obj == "Label":
+            return self.api.get_labels()
+        else:
+            raise Exception("Unknown object type")
+
     def todoist_project_to_superprod(self) -> List[SPProject]:
         projects: List[Project] = self.api.get_projects()
         spprojects = []
@@ -127,24 +138,22 @@ class TodoistScraper:
             spprojects.append(SPProject.from_todoist(project))
         return spprojects
 
-    def todoist_label_to_superprod(self) -> List[SPTag]:
-        return []
-
-    def todoist_to_superprod(self):
-        pass
+    def todoist_to_superprod(self, cls: Type[SPObject]) -> List[SPObject]:
+        objs: List[Project | Task | Label] = self.get_todoist_objects(cls)
+        return [cls.from_todoist(obj).to_dict() for obj in objs]
 
     def export_objects(self):
         # objects = self.collect_objects()
         objects = {}
 
         if self.config.projects:
-            objects["projects"] = self.todoist_project_to_superprod()
+            objects["projects"] = self.todoist_to_superprod(SPProject)
 
         if self.config.tasks:
-            objects["tasks"] = self.todoist_task_to_superprod()
+            objects["tasks"] = self.todoist_to_superprod(SPTask)
 
         if self.config.labels:
-            objects["labels"] = self.todoist_label_to_superprod()
+            objects["labels"] = self.todoist_to_superprod(SPLabel)
 
         if self.config.path is not None and os.path.exists(self.config.path):
             with open(self.config.path, "w") as f:
@@ -176,7 +185,7 @@ if __name__ == '__main__':
         help='Whether to add subtasks as tasks or not add them at all')
 
     args = parser.parse_args()
-    path = "~/Library/Application Support/superProductivity/"
+    path = r"~/Library/Application Support/superProductivity/"
 
     if platform.system() == 'Windows':
         path = "C:/Users/" + os.getlogin(

@@ -10,3 +10,6 @@ class WorklogExportSettings:
     roundEndTimeTo: Optional[int] = None
     separateTasksBy: str = " | "
     groupBy: str = "DATE"
+
+    def to_dict(self):
+        return self.__dict__

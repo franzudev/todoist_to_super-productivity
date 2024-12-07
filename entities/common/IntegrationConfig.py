@@ -25,3 +25,6 @@ class IntegrationConfig:
     autoAddBacklogJqlQuery: Optional[str] = None
     worklogDialogDefaultTime: Optional[str] = None
     transitionConfig: Optional[TransitionConfig] = None
+
+    def to_dict(self):
+        return self.__dict__

@@ -14,3 +14,6 @@ class Theme:
     hueWarn: str
     backgroundImageDark: Optional[str] = None
     backgroundImageLight: Optional[str] = None
+
+    def to_dict(self):
+        return self.__dict__

@@ -9,10 +9,11 @@ from entities.common.IntegrationConfig import IntegrationConfig
 from entities.common.IssueIntegrationCfgs import IssueIntegrationCfgs
 from entities.common.Theme import Theme
 from entities.common.WorklogExportSettings import WorklogExportSettings
+from entities.interfaces.Object import SPObject
 
 
 @dataclass
-class SPProject:
+class SPProject(SPObject):
     id: str
     title: str
     isHiddenFromMenu: bool
@@ -66,3 +67,23 @@ class SPProject:
             breakTime={},
             breakNr={},
         )
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "title": self.title,
+            "isHiddenFromMenu": self.isHiddenFromMenu,
+            "isArchived": self.isArchived,
+            "isEnableBacklog": self.isEnableBacklog,
+            "issueIntegrationCfgs": self.issueIntegrationCfgs.to_dict(),
+            "backlogTaskIds": self.backlogTaskIds,
+            "noteIds": self.noteIds,
+            "advancedCfg": self.advancedCfg.to_dict(),
+            "theme": self.theme.to_dict(),
+            "workStart": self.workStart,
+            "workEnd": self.workEnd,
+            "breakTime": self.breakTime,
+            "breakNr": self.breakNr,
+            "taskIds": self.taskIds,
+            "icon": self.icon
+        }
