@@ -3,8 +3,9 @@ from abc import ABC, abstractmethod
 
 class SPObject(ABC):
 
+    @classmethod
     @abstractmethod
-    def from_todoist(self, todoist_object):
+    def from_todoist(cls, todoist_object):
         pass
 
     @abstractmethod
