@@ -8,7 +8,7 @@ from typing import List, Type
 from todoist_api_python.api import TodoistAPI
 from todoist_api_python.models import Label, Project, Task
 
-from entities.interfaces.Object import SPObject
+from entities.interfaces.SPObject import SPObject
 from entities.SPLabel import SPLabel
 from entities.SPProject import SPProject
 from entities.SPTask import SPTask

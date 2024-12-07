@@ -4,7 +4,7 @@ from typing import Dict, List, Optional
 
 from todoist_api_python.models import Task
 
-from entities.interfaces.Object import SPObject
+from entities.interfaces.SPObject import SPObject
 
 
 @dataclass

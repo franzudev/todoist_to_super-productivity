@@ -9,7 +9,7 @@ from entities.common.IntegrationConfig import IntegrationConfig
 from entities.common.IssueIntegrationCfgs import IssueIntegrationCfgs
 from entities.common.Theme import Theme
 from entities.common.WorklogExportSettings import WorklogExportSettings
-from entities.interfaces.Object import SPObject
+from entities.interfaces.SPObject import SPObject
 
 
 @dataclass

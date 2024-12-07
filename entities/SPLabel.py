@@ -7,7 +7,7 @@ from todoist_api_python.models import Label
 from entities.common.AdvancedCfg import AdvancedCfg
 from entities.common.Theme import Theme
 from entities.common.WorklogExportSettings import WorklogExportSettings
-from entities.interfaces.Object import SPObject
+from entities.interfaces.SPObject import SPObject
 
 
 @dataclass
