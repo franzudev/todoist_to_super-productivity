@@ -39,87 +39,6 @@ class TodoistScraper:
         self.api = TodoistAPI(config.token)
         self.config = config
 
-    @staticmethod
-    def _obj_to_dict(list_objs: List[Project | Task | Label]):
-        """
-        Converts a list of Todoist objects (Project, Task, or Label) to a list of dictionaries.
-
-        Args:
-            list_objs (List[Project | Task | Label]): A list of Todoist objects to convert.
-
-        Returns:
-            List[dict]: A list of dictionaries, where each dictionary represents a Todoist object.
-        """
-        dict_objs = []
-
-        for obj in list_objs:
-            try:
-                if hasattr(obj.__class__, "to_dict") and callable(
-                        getattr(obj.__class__, "to_dict")):
-                    dict_objs.append(obj.to_dict())
-                    continue
-                dict_objs.append(obj.__dict__)
-            except Exception as error:
-                f = open("error.txt", "a")
-                dict_error = {
-                    "type": obj.__class__.__name__,
-                    "id": obj.id,
-                    "name": obj.name if hasattr(obj, "name") else obj.content,
-                    "error": str(error)
-                }
-                f.write(json.dumps(dict_error, indent=4) + "\n")
-
-        return dict_objs
-
-    def _get_tasks(self):
-        """
-        Converts a list of Tasks obtained from the Todoist API to a list of dictionaries.
-
-        Returns:
-            List[dict]: A list of dictionaries, where each dictionary represents a Task.
-        """
-        return self._obj_to_dict(self.api.get_tasks())
-
-    def _get_projects(self):
-        """
-        Converts a list of Projects obtained from the Todoist API to a list of dictionaries.
-
-        Returns:
-            List[dict]: A list of dictionaries, where each dictionary represents a Project.
-        """
-        return self._obj_to_dict(self.api.get_projects())
-
-    def _get_labels(self):
-        """
-        Converts a list of Labels obtained from the Todoist API to a list of dictionaries.
-
-        Returns:
-            List[dict]: A list of dictionaries, where each dictionary represents a Label.
-        """
-        return self._obj_to_dict(self.api.get_labels())
-
-    def collect_objects(self):
-        """
-        Collects objects from the Todoist API according to the `ExporterConfig`
-        attributes `tasks`, `projects` and `labels`.
-
-        Returns:
-            dict: A dictionary with keys "tasks", "projects" and "labels", each
-            containing a list of dictionaries representing the respective objects.
-        """
-        return {
-            "tasks": self._get_tasks() if self.config.tasks else [],
-            "projects": self._get_projects() if self.config.projects else [],
-            "labels": self._get_labels() if self.config.labels else []
-        }
-
-    def todoist_task_to_superprod(self) -> List[SPTask]:
-        tasks: List[Task] = self.api.get_tasks()
-        sptasks = []
-        for task in tasks:
-            sptasks.append(SPTask.from_todoist(task))
-        return sptasks
-
     def get_todoist_objects(self, cls: Type[SPObject]):
         obj = cls.__name__.replace("SP", "")
         if obj == "Project":
@@ -130,13 +49,6 @@ class TodoistScraper:
             return self.api.get_labels()
         else:
             raise Exception("Unknown object type")
-
-    def todoist_project_to_superprod(self) -> List[SPProject]:
-        projects: List[Project] = self.api.get_projects()
-        spprojects = []
-        for project in projects:
-            spprojects.append(SPProject.from_todoist(project))
-        return spprojects
 
     def todoist_to_superprod(self, cls: Type[SPObject]) -> List[SPObject]:
         objs: List[Project | Task | Label] = self.get_todoist_objects(cls)
