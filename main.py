@@ -75,6 +75,7 @@ class TodoistScraper:
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--token',
+                        required=True,
                         type=str,
                         help='Todoist API token for querying tasks')
     parser.add_argument(
