@@ -1,38 +1,41 @@
 exclude: ^(profiling/|tests/data/)
 repos:
-  - repo: https://github.com/pycqa/isort
-    rev: 5.13.2
-    hooks:
+  - hooks:
       - id: isort
-
-  - repo: https://github.com/pre-commit/mirrors-prettier
+    repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+  - hooks:
+      - exclude: \.github/workflows/diff_shades\.yml
+        id: prettier
+    repo: https://github.com/pre-commit/mirrors-prettier
     rev: v4.0.0-alpha.8
-    hooks:
-      - id: prettier
-        exclude: \.github/workflows/diff_shades\.yml
-
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
-    hooks:
+  - hooks:
       - id: end-of-file-fixer
       - id: trailing-whitespace
       - id: check-docstring-first
-
-  - repo: https://github.com/google/yapf
-    rev: v0.40.2
-    hooks:
-      - id: yapf
-        name: yapf
-        language: python
+    repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+  - hooks:
+      - args:
+          - -i
+          - "--style={based_on_style: google, spaces_before_comment: 4, split_before_logical_operator:
+            true}"
         entry: yapf
-        args:
-          [
-            -i,
-            "--style={based_on_style: google, spaces_before_comment: 4, split_before_logical_operator: true}",
-          ]
-        types: [python]
-
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.8.0
-    hooks:
+        id: yapf
+        language: python
+        name: yapf
+        types:
+          - python
+    repo: https://github.com/google/yapf
+    rev: v0.40.2
+  - hooks:
       - id: mypy
+    repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.8.0
+  - hooks:
+      - id: commitizen
+      - id: commitizen-branch
+        stages:
+          - push
+    repo: https://github.com/commitizen-tools/commitizen
+    rev: v4.0.0
